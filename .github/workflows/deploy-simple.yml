@@ -1,0 +1,40 @@
+name: Simple Deploy to EC2
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "🚀 Deploying to EC2..."
+
+            # Navigate to project directory
+            cd your-repo-name/AWS-Node
+
+            # Pull latest changes
+            git pull origin main
+
+            # Install dependencies
+            npm install
+
+            # Restart application
+            pm2 restart weather-dashboard
+
+            # Check deployment
+            sleep 3
+            if curl -f http://localhost:3000/health; then
+              echo "✅ Deployment successful!"
+            else
+              echo "❌ Deployment failed!"
+              exit 1
+            fi
