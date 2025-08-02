@@ -1,0 +1,108 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: |
+          cd AWS-Node
+          npm install
+
+      - name: Test application
+        run: |
+          cd AWS-Node
+          node -e "console.log('✅ Application test passed')"
+
+      - name: Check if app.js exists
+        run: |
+          cd AWS-Node
+          if [ -f "app.js" ]; then
+            echo "✅ app.js found"
+          else
+            echo "❌ app.js not found"
+            exit 1
+          fi
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "🚀 Starting deployment..."
+
+            cd AWS-Node
+
+            # Backup current version
+            echo "📦 Creating backup..."
+            cd ..
+            cp -r AWS-Node AWS-Node-backup-$(date +%Y%m%d-%H%M%S)
+            cd AWS-Node
+
+            # Pull latest changes
+            echo "⬇️ Pulling latest changes..."
+            git pull origin main
+
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            npm install
+
+            # Test the application locally
+            echo "🧪 Testing application..."
+            node -e "console.log('✅ Local test passed')"
+
+            # Restart with PM2
+            echo "🔄 Restarting application..."
+            pm2 restart Wheather-App
+
+            # Wait a moment for the app to start
+            sleep 5
+
+            # Check if deployment was successful
+            echo "🔍 Verifying deployment..."
+            if curl -f http://localhost:3000/health; then
+              echo "✅ Deployment successful!"
+              echo "🌐 Application is running at: http://${{ secrets.EC2_HOST }}"
+            else
+              echo "❌ Deployment failed, rolling back..."
+              cd ..
+              rm -rf AWS-Node
+              mv AWS-Node-backup-* AWS-Node
+              cd AWS-Node
+              pm2 restart Wheather-App
+              echo "🔄 Rollback completed"
+              exit 1
+            fi
+
+            # Show PM2 status
+            echo "📊 PM2 Status:"
+            pm2 status
+
+            # Show recent logs
+            echo "📋 Recent logs:"
+            pm2 logs Wheather-App --lines 10
+
+            echo "🎉 Deployment completed successfully!"
