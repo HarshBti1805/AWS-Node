@@ -74,7 +74,7 @@ jobs:
 
             # Restart with PM2
             echo "🔄 Restarting application..."
-            pm2 restart Wheather-App
+            pm2 restart Weather-App
 
             # Wait a moment for the app to start
             sleep 5
