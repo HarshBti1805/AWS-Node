@@ -21,17 +21,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd AWS-Node
           npm install
 
       - name: Test application
         run: |
-          cd AWS-Node
           node -e "console.log('✅ Application test passed')"
 
       - name: Check if app.js exists
         run: |
-          cd AWS-Node
           if [ -f "app.js" ]; then
             echo "✅ app.js found"
           else
