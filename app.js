@@ -14,141 +14,211 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 
+// Helper function to get weather data
+async function getWeatherData(city, apiKey) {
+  if (apiKey === "demo") {
+    return getDemoWeatherData(city);
+  }
+
+  try {
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Helper function to get forecast data
+async function getForecastData(city, apiKey) {
+  if (apiKey === "demo") {
+    return getDemoForecastData(city);
+  }
+
+  try {
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Demo weather data with more variety
+function getDemoWeatherData(city) {
+  const demoData = {
+    "New York": {
+      temp: 18,
+      feels_like: 20,
+      humidity: 70,
+      pressure: 1015,
+      weather: "Clear",
+      icon: "01d",
+      country: "US",
+      wind: 4.2,
+      visibility: 10000,
+    },
+    London: {
+      temp: 15,
+      feels_like: 13,
+      humidity: 80,
+      pressure: 1010,
+      weather: "Rain",
+      icon: "10d",
+      country: "GB",
+      wind: 6.1,
+      visibility: 8000,
+    },
+    Tokyo: {
+      temp: 25,
+      feels_like: 28,
+      humidity: 65,
+      pressure: 1018,
+      weather: "Clouds",
+      icon: "03d",
+      country: "JP",
+      wind: 2.8,
+      visibility: 10000,
+    },
+    Sydney: {
+      temp: 22,
+      feels_like: 24,
+      humidity: 75,
+      pressure: 1012,
+      weather: "Clear",
+      icon: "01d",
+      country: "AU",
+      wind: 5.5,
+      visibility: 10000,
+    },
+    Paris: {
+      temp: 20,
+      feels_like: 22,
+      humidity: 68,
+      pressure: 1016,
+      weather: "Clouds",
+      icon: "03d",
+      country: "FR",
+      wind: 3.7,
+      visibility: 9000,
+    },
+    Mumbai: {
+      temp: 30,
+      feels_like: 35,
+      humidity: 85,
+      pressure: 1008,
+      weather: "Clear",
+      icon: "01d",
+      country: "IN",
+      wind: 2.1,
+      visibility: 7000,
+    },
+    Dubai: {
+      temp: 35,
+      feels_like: 38,
+      humidity: 45,
+      pressure: 1010,
+      weather: "Clear",
+      icon: "01d",
+      country: "AE",
+      wind: 8.3,
+      visibility: 10000,
+    },
+    Singapore: {
+      temp: 28,
+      feels_like: 32,
+      humidity: 80,
+      pressure: 1014,
+      weather: "Thunderstorm",
+      icon: "11d",
+      country: "SG",
+      wind: 4.8,
+      visibility: 6000,
+    },
+  };
+
+  const cityData = demoData[city] || demoData["London"];
+
+  return {
+    name: city,
+    main: {
+      temp: cityData.temp,
+      feels_like: cityData.feels_like,
+      humidity: cityData.humidity,
+      pressure: cityData.pressure,
+    },
+    weather: [
+      {
+        main: cityData.weather,
+        description: cityData.weather.toLowerCase(),
+        icon: cityData.icon,
+      },
+    ],
+    wind: {
+      speed: cityData.wind,
+    },
+    sys: {
+      country: cityData.country,
+    },
+    visibility: cityData.visibility,
+    dt: Math.floor(Date.now() / 1000),
+  };
+}
+
+// Demo forecast data
+function getDemoForecastData(city) {
+  const forecasts = [];
+  const baseTemp = getDemoWeatherData(city).main.temp;
+
+  for (let i = 0; i < 5; i++) {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
+
+    forecasts.push({
+      dt: Math.floor(date.getTime() / 1000),
+      main: {
+        temp: baseTemp + (Math.random() - 0.5) * 10,
+        humidity: 60 + Math.random() * 30,
+      },
+      weather: [
+        {
+          main: ["Clear", "Clouds", "Rain"][Math.floor(Math.random() * 3)],
+          icon: ["01d", "03d", "10d"][Math.floor(Math.random() * 3)],
+        },
+      ],
+      dt_txt: date.toISOString(),
+    });
+  }
+
+  return {
+    list: forecasts,
+    city: { name: city },
+  };
+}
+
 // Routes
 app.get("/", async (req, res) => {
   try {
-    // Default city (can be changed via query parameter)
     const city = req.query.city || "London";
-
-    // Using OpenWeatherMap API (free tier)
-    const apiKey = process.env.OPENWEATHER_API_KEY || "demo"; // You'll need to get a free API key
-    const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
 
     let weatherData = null;
     let error = null;
 
-    // Check if we should use demo mode (only if no API key or API key is invalid)
     const useDemoMode = apiKey === "demo";
 
     if (apiKey !== "demo" && !useDemoMode) {
       try {
-        const response = await axios.get(weatherUrl);
-        weatherData = response.data;
+        weatherData = await getWeatherData(city, apiKey);
       } catch (apiError) {
         error =
           "Unable to fetch weather data. Please check the city name or try again later.";
         console.error("Weather API Error:", apiError.message);
       }
     } else {
-      // Demo data for when no API key is provided
-      // Generate different demo data based on city name for variety
-      const demoData = {
-        "New York": {
-          temp: 18,
-          feels_like: 20,
-          humidity: 70,
-          pressure: 1015,
-          weather: "Clear",
-          icon: "01d",
-          country: "US",
-          wind: 4.2,
-        },
-        London: {
-          temp: 15,
-          feels_like: 13,
-          humidity: 80,
-          pressure: 1010,
-          weather: "Rain",
-          icon: "10d",
-          country: "GB",
-          wind: 6.1,
-        },
-        Tokyo: {
-          temp: 25,
-          feels_like: 28,
-          humidity: 65,
-          pressure: 1018,
-          weather: "Clouds",
-          icon: "03d",
-          country: "JP",
-          wind: 2.8,
-        },
-        Sydney: {
-          temp: 22,
-          feels_like: 24,
-          humidity: 75,
-          pressure: 1012,
-          weather: "Clear",
-          icon: "01d",
-          country: "AU",
-          wind: 5.5,
-        },
-        Paris: {
-          temp: 20,
-          feels_like: 22,
-          humidity: 68,
-          pressure: 1016,
-          weather: "Clouds",
-          icon: "03d",
-          country: "FR",
-          wind: 3.7,
-        },
-        Mumbai: {
-          temp: 30,
-          feels_like: 35,
-          humidity: 85,
-          pressure: 1008,
-          weather: "Clear",
-          icon: "01d",
-          country: "IN",
-          wind: 2.1,
-        },
-        Dubai: {
-          temp: 35,
-          feels_like: 38,
-          humidity: 45,
-          pressure: 1010,
-          weather: "Clear",
-          icon: "01d",
-          country: "AE",
-          wind: 8.3,
-        },
-        Singapore: {
-          temp: 28,
-          feels_like: 32,
-          humidity: 80,
-          pressure: 1014,
-          weather: "Thunderstorm",
-          icon: "11d",
-          country: "SG",
-          wind: 4.8,
-        },
-      };
-
-      const cityData = demoData[city] || demoData["London"];
-
-      weatherData = {
-        name: city,
-        main: {
-          temp: cityData.temp,
-          feels_like: cityData.feels_like,
-          humidity: cityData.humidity,
-          pressure: cityData.pressure,
-        },
-        weather: [
-          {
-            main: cityData.weather,
-            description: cityData.weather.toLowerCase(),
-            icon: cityData.icon,
-          },
-        ],
-        wind: {
-          speed: cityData.wind,
-        },
-        sys: {
-          country: cityData.country,
-        },
-      };
+      weatherData = getDemoWeatherData(city);
     }
 
     res.render("index", {
@@ -168,12 +238,192 @@ app.get("/", async (req, res) => {
   }
 });
 
+// Forecast route
+app.get("/forecast", async (req, res) => {
+  try {
+    const city = req.query.city || "London";
+    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+
+    let forecastData = null;
+    let error = null;
+
+    const useDemoMode = apiKey === "demo";
+
+    if (apiKey !== "demo" && !useDemoMode) {
+      try {
+        forecastData = await getForecastData(city, apiKey);
+      } catch (apiError) {
+        error =
+          "Unable to fetch forecast data. Please check the city name or try again later.";
+        console.error("Forecast API Error:", apiError.message);
+      }
+    } else {
+      forecastData = getDemoForecastData(city);
+    }
+
+    res.render("forecast", {
+      forecast: forecastData,
+      error: error,
+      city: city,
+      hasApiKey: apiKey !== "demo",
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+    res.render("forecast", {
+      forecast: null,
+      error: "An unexpected error occurred. Please try again.",
+      city: req.query.city || "London",
+      hasApiKey: false,
+    });
+  }
+});
+
+// Multiple cities comparison
+app.get("/compare", async (req, res) => {
+  try {
+    const cities = req.query.cities
+      ? req.query.cities.split(",")
+      : ["London", "New York", "Tokyo"];
+    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+
+    let citiesData = [];
+    let error = null;
+
+    const useDemoMode = apiKey === "demo";
+
+    for (const city of cities) {
+      try {
+        if (apiKey !== "demo" && !useDemoMode) {
+          const data = await getWeatherData(city, apiKey);
+          citiesData.push(data);
+        } else {
+          const data = getDemoWeatherData(city);
+          citiesData.push(data);
+        }
+      } catch (apiError) {
+        console.error(`Error fetching data for ${city}:`, apiError.message);
+      }
+    }
+
+    res.render("compare", {
+      cities: citiesData,
+      error: error,
+      cityList: cities.join(","),
+      hasApiKey: apiKey !== "demo",
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+    res.render("compare", {
+      cities: [],
+      error: "An unexpected error occurred. Please try again.",
+      cityList: "London,New York,Tokyo",
+      hasApiKey: false,
+    });
+  }
+});
+
+// Air quality route (demo data)
+app.get("/air-quality", async (req, res) => {
+  try {
+    const city = req.query.city || "London";
+
+    // Demo air quality data
+    const airQualityData = {
+      name: city,
+      aqi: Math.floor(Math.random() * 200) + 50,
+      components: {
+        co: (Math.random() * 2000 + 500).toFixed(1),
+        no2: (Math.random() * 50 + 10).toFixed(1),
+        o3: (Math.random() * 100 + 20).toFixed(1),
+        pm2_5: (Math.random() * 50 + 5).toFixed(1),
+        pm10: (Math.random() * 100 + 10).toFixed(1),
+      },
+      dt: Math.floor(Date.now() / 1000),
+    };
+
+    res.render("air-quality", {
+      airQuality: airQualityData,
+      city: city,
+      error: null,
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+    res.render("air-quality", {
+      airQuality: null,
+      error: "An unexpected error occurred. Please try again.",
+      city: req.query.city || "London",
+    });
+  }
+});
+
+// API endpoints
+app.get("/api/weather/:city", async (req, res) => {
+  try {
+    const city = req.params.city;
+    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+
+    const weatherData = await getWeatherData(city, apiKey);
+    res.json(weatherData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch weather data" });
+  }
+});
+
+app.get("/api/forecast/:city", async (req, res) => {
+  try {
+    const city = req.params.city;
+    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+
+    const forecastData = await getForecastData(city, apiKey);
+    res.json(forecastData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch forecast data" });
+  }
+});
+
 // Health check endpoint for AWS
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    version: "2.0.0",
+  });
+});
+
+// Stats endpoint
+app.get("/stats", (req, res) => {
+  res.json({
+    server: {
+      uptime: process.uptime(),
+      memory: process.memoryUsage(),
+      nodeVersion: process.version,
+      platform: process.platform,
+    },
+    app: {
+      version: "2.0.0",
+      features: [
+        "Current Weather",
+        "5-Day Forecast",
+        "City Comparison",
+        "Air Quality",
+        "API Endpoints",
+      ],
+      endpoints: [
+        "/",
+        "/forecast",
+        "/compare",
+        "/air-quality",
+        "/api/weather/:city",
+        "/api/forecast/:city",
+      ],
+    },
+  });
 });
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   console.log(`Health check available at http://localhost:${PORT}/health`);
+  console.log(`New features: Forecast, Compare, Air Quality, API endpoints`);
 });

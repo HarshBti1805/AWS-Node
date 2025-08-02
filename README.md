@@ -4,13 +4,44 @@ A beautiful, responsive weather dashboard built with Express.js, EJS templating,
 
 ## Features
 
-- 🌤️ Real-time weather data from OpenWeatherMap API
-- 📱 Fully responsive design
-- 🎨 Modern, beautiful UI with smooth animations
-- 🔍 Search any city worldwide
-- 📊 Detailed weather information (temperature, humidity, wind, pressure)
-- ⚡ Fast and lightweight
-- 🚀 Ready for AWS EC2 deployment
+### 🌤️ Core Weather Features
+
+- **Real-time weather data** from OpenWeatherMap API
+- **5-day weather forecast** with detailed predictions
+- **Multiple cities comparison** side-by-side
+- **Air quality index** with detailed metrics
+- **Search any city worldwide** with instant results
+
+### 🎨 User Interface
+
+- **Fully responsive design** for all devices
+- **Modern, beautiful UI** with smooth animations
+- **Interactive navigation** between different features
+- **Glass-morphism effects** and gradient backgrounds
+- **Real-time clock** and dynamic weather icons
+
+### 📊 Data & Analytics
+
+- **Detailed weather metrics** (temperature, humidity, wind, pressure, visibility)
+- **Air quality components** (CO, NO₂, O₃, PM2.5, PM10)
+- **Weather comparison tools** with summary statistics
+- **Historical data visualization** (forecast trends)
+
+### 🔧 Technical Features
+
+- **RESTful API endpoints** for external integrations
+- **Health monitoring** and system statistics
+- **Automatic deployment** with CI/CD pipeline
+- **Error handling** and graceful fallbacks
+- **Demo mode** for testing without API keys
+
+### 🚀 Deployment & Infrastructure
+
+- **AWS EC2 ready** with optimized configuration
+- **PM2 process management** for production stability
+- **Nginx reverse proxy** for performance
+- **SSL certificate support** for HTTPS
+- **Auto-scaling capabilities** for high traffic
 
 ## Screenshots
 
@@ -79,8 +110,24 @@ The application will be available at `http://localhost:3000`
 
 ## API Endpoints
 
+### Web Pages
+
 - `GET /` - Main weather dashboard page
+- `GET /forecast` - 5-day weather forecast page
+- `GET /compare` - Multiple cities comparison page
+- `GET /air-quality` - Air quality index page
+
+### REST API
+
+- `GET /api/weather/:city` - Get weather data for a specific city (JSON)
+- `GET /api/forecast/:city` - Get forecast data for a specific city (JSON)
 - `GET /health` - Health check endpoint (useful for AWS load balancers)
+- `GET /stats` - System statistics and application information
+
+### Query Parameters
+
+- `?city=London` - Specify city for weather/forecast/air-quality
+- `?cities=London,New York,Tokyo` - Specify multiple cities for comparison
 
 ## Project Structure
 

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality - <%= city %>
+    </title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .aq-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .aq-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .aq-main-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+
+        .aq-index {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .aq-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            position: relative;
+        }
+
+        .aq-circle.good {
+            background: linear-gradient(135deg, #00e676, #00c853);
+        }
+
+        .aq-circle.moderate {
+            background: linear-gradient(135deg, #ffeb3b, #ffc107);
+        }
+
+        .aq-circle.unhealthy {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+        }
+
+        .aq-circle.very-unhealthy {
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+        }
+
+        .aq-circle.hazardous {
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+        }
+
+        .aq-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .aq-label {
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .aq-description {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .aq-components {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .aq-component {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #e1e8ed;
+            transition: all 0.3s ease;
+        }
+
+        .aq-component:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .component-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .component-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .component-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .component-unit {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .aq-info {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .aq-info h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .aq-levels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .aq-level {
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            font-weight: 500;
+        }
+
+        .aq-level.good {
+            background: #00e676;
+        }
+
+        .aq-level.moderate {
+            background: #ffeb3b;
+            color: #333;
+        }
+
+        .aq-level.unhealthy {
+            background: #ff9800;
+        }
+
+        .aq-level.very-unhealthy {
+            background: #e91e63;
+        }
+
+        .aq-level.hazardous {
+            background: #9c27b0;
+        }
+
+        .aq-timestamp {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="aq-container">
+        <header class="aq-header">
+            <h1><i class="fas fa-wind"></i> Air Quality Index</h1>
+            <p>Real-time air quality information for <%= city %>
+            </p>
+        </header>
+
+        <div class="navigation">
+            <a href="/" class="nav-btn"><i class="fas fa-home"></i> Current Weather</a>
+            <a href="/forecast" class="nav-btn"><i class="fas fa-calendar-alt"></i> Forecast</a>
+            <a href="/compare" class="nav-btn"><i class="fas fa-balance-scale"></i> Compare Cities</a>
+            <a href="/air-quality" class="nav-btn active"><i class="fas fa-wind"></i> Air Quality</a>
+        </div>
+
+        <div class="search-section">
+            <form class="search-form" method="GET" action="/air-quality">
+                <div class="search-input-group">
+                    <input type="text" name="city" placeholder="Enter city name for air quality..." value="<%= city %>"
+                        class="search-input" required>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <% if (error) { %>
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <%= error %>
+            </div>
+            <% } %>
+
+                <% if (airQuality) { %>
+                    <div class="aq-main-card">
+                        <div class="aq-index">
+                            <div class="aq-circle 
+                        <% if (airQuality.aqi <= 50) { %>good
+                        <% } else if (airQuality.aqi <= 100) { %>moderate
+                        <% } else if (airQuality.aqi <= 150) { %>unhealthy
+                        <% } else if (airQuality.aqi <= 200) { %>very-unhealthy
+                        <% } else { %>hazardous<% } %>">
+                                <div>
+                                    <div class="aq-value">
+                                        <%= airQuality.aqi %>
+                                    </div>
+                                    <div class="aq-label">AQI</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="aq-description">
+                            <% if (airQuality.aqi <=50) { %>
+                                <i class="fas fa-smile"></i> Good - Air quality is satisfactory
+                                <% } else if (airQuality.aqi <=100) { %>
+                                    <i class="fas fa-meh"></i> Moderate - Air quality is acceptable
+                                    <% } else if (airQuality.aqi <=150) { %>
+                                        <i class="fas fa-frown"></i> Unhealthy for Sensitive Groups
+                                        <% } else if (airQuality.aqi <=200) { %>
+                                            <i class="fas fa-sad-tear"></i> Unhealthy - Everyone may experience effects
+                                            <% } else { %>
+                                                <i class="fas fa-dizzy"></i> Hazardous - Health warnings of emergency
+                                                conditions
+                                                <% } %>
+                        </div>
+                    </div>
+
+                    <div class="aq-components">
+                        <div class="aq-component">
+                            <div class="component-icon">🌬️</div>
+                            <div class="component-name">Carbon Monoxide (CO)</div>
+                            <div class="component-value">
+                                <%= airQuality.components.co %>
+                            </div>
+                            <div class="component-unit">μg/m³</div>
+                        </div>
+
+                        <div class="aq-component">
+                            <div class="component-icon">🚗</div>
+                            <div class="component-name">Nitrogen Dioxide (NO₂)</div>
+                            <div class="component-value">
+                                <%= airQuality.components.no2 %>
+                            </div>
+                            <div class="component-unit">μg/m³</div>
+                        </div>
+
+                        <div class="aq-component">
+                            <div class="component-icon">☀️</div>
+                            <div class="component-name">Ozone (O₃)</div>
+                            <div class="component-value">
+                                <%= airQuality.components.o3 %>
+                            </div>
+                            <div class="component-unit">μg/m³</div>
+                        </div>
+
+                        <div class="aq-component">
+                            <div class="component-icon">💨</div>
+                            <div class="component-name">PM2.5</div>
+                            <div class="component-value">
+                                <%= airQuality.components.pm2_5 %>
+                            </div>
+                            <div class="component-unit">μg/m³</div>
+                        </div>
+
+                        <div class="aq-component">
+                            <div class="component-icon">🌫️</div>
+                            <div class="component-name">PM10</div>
+                            <div class="component-value">
+                                <%= airQuality.components.pm10 %>
+                            </div>
+                            <div class="component-unit">μg/m³</div>
+                        </div>
+                    </div>
+
+                    <div class="aq-info">
+                        <h3><i class="fas fa-info-circle"></i> Air Quality Levels</h3>
+                        <div class="aq-levels">
+                            <div class="aq-level good">Good (0-50)</div>
+                            <div class="aq-level moderate">Moderate (51-100)</div>
+                            <div class="aq-level unhealthy">Unhealthy (101-150)</div>
+                            <div class="aq-level very-unhealthy">Very Unhealthy (151-200)</div>
+                            <div class="aq-level hazardous">Hazardous (201+)</div>
+                        </div>
+                    </div>
+
+                    <div class="aq-timestamp">
+                        <i class="fas fa-clock"></i>
+                        Last updated: <%= new Date(airQuality.dt * 1000).toLocaleString() %>
+                    </div>
+                    <% } %>
+
+                        <footer class="footer">
+                            <p>Powered by OpenWeatherMap API</p>
+                            <p>Deployed on AWS EC2</p>
+                        </footer>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Cities Weather</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .compare-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .compare-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .compare-form {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .compare-form h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .cities-input {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cities-input input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .cities-input input:focus {
+            border-color: #667eea;
+        }
+
+        .compare-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .compare-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .cities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .city-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .city-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .city-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .city-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .city-country {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .city-weather {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .city-temp {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .city-icon img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .city-description {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-transform: capitalize;
+        }
+
+        .city-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .city-detail {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .city-detail i {
+            color: #667eea;
+            width: 20px;
+        }
+
+        .city-detail span {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .comparison-summary {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .summary-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="compare-container">
+        <header class="compare-header">
+            <h1><i class="fas fa-balance-scale"></i> Compare Cities Weather</h1>
+            <p>Side-by-side weather comparison for multiple cities</p>
+        </header>
+
+        <div class="navigation">
+            <a href="/" class="nav-btn"><i class="fas fa-home"></i> Current Weather</a>
+            <a href="/forecast" class="nav-btn"><i class="fas fa-calendar-alt"></i> Forecast</a>
+            <a href="/compare" class="nav-btn active"><i class="fas fa-balance-scale"></i> Compare Cities</a>
+            <a href="/air-quality" class="nav-btn"><i class="fas fa-wind"></i> Air Quality</a>
+        </div>
+
+        <div class="compare-form">
+            <h3><i class="fas fa-search"></i> Compare Cities</h3>
+            <form method="GET" action="/compare">
+                <div class="cities-input">
+                    <input type="text" name="cities"
+                        placeholder="Enter cities separated by commas (e.g., London, New York, Tokyo)"
+                        value="<%= cityList %>" required>
+                    <button type="submit" class="compare-btn">
+                        <i class="fas fa-balance-scale"></i> Compare
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <% if (error) { %>
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <%= error %>
+            </div>
+            <% } %>
+
+                <% if (cities && cities.length> 0) { %>
+                    <div class="comparison-summary">
+                        <div class="summary-title">
+                            <i class="fas fa-chart-bar"></i> Comparison Summary
+                        </div>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <div class="summary-label">Warmest City</div>
+                                <div class="summary-value">
+                                    <% const warmest=cities.reduce((max, city)=>
+                                        city.main.temp > max.main.temp ? city : max
+                                        );
+                                        %>
+                                        <%= warmest.name %> (<%= Math.round(warmest.main.temp) %>°C)
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Coldest City</div>
+                                <div class="summary-value">
+                                    <% const coldest=cities.reduce((min, city)=>
+                                        city.main.temp < min.main.temp ? city : min ); %>
+                                            <%= coldest.name %> (<%= Math.round(coldest.main.temp) %>°C)
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Most Humid</div>
+                                <div class="summary-value">
+                                    <% const mostHumid=cities.reduce((max, city)=>
+                                        city.main.humidity > max.main.humidity ? city : max
+                                        );
+                                        %>
+                                        <%= mostHumid.name %> (<%= mostHumid.main.humidity %>%)
+                                </div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Windiest</div>
+                                <div class="summary-value">
+                                    <% const windiest=cities.reduce((max, city)=>
+                                        city.wind.speed > max.wind.speed ? city : max
+                                        );
+                                        %>
+                                        <%= windiest.name %> (<%= windiest.wind.speed %> m/s)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cities-grid">
+                        <% cities.forEach(city=> { %>
+                            <div class="city-card">
+                                <div class="city-name">
+                                    <%= city.name %>
+                                </div>
+                                <div class="city-country">
+                                    <%= city.sys.country %>
+                                </div>
+
+                                <div class="city-weather">
+                                    <div class="city-temp">
+                                        <%= Math.round(city.main.temp) %>°C
+                                    </div>
+                                    <div class="city-icon">
+                                        <img src="https://openweathermap.org/img/wn/<%= city.weather[0].icon %>@2x.png"
+                                            alt="<%= city.weather[0].description %>">
+                                    </div>
+                                </div>
+
+                                <div class="city-description">
+                                    <%= city.weather[0].description %>
+                                </div>
+
+                                <div class="city-details">
+                                    <div class="city-detail">
+                                        <i class="fas fa-thermometer-half"></i>
+                                        <span>Feels like <%= Math.round(city.main.feels_like) %>°C</span>
+                                    </div>
+                                    <div class="city-detail">
+                                        <i class="fas fa-tint"></i>
+                                        <span>
+                                            <%= city.main.humidity %>%
+                                        </span>
+                                    </div>
+                                    <div class="city-detail">
+                                        <i class="fas fa-wind"></i>
+                                        <span>
+                                            <%= city.wind.speed %> m/s
+                                        </span>
+                                    </div>
+                                    <div class="city-detail">
+                                        <i class="fas fa-compress-alt"></i>
+                                        <span>
+                                            <%= city.main.pressure %> hPa
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } %>
+
+                        <footer class="footer">
+                            <p>Powered by OpenWeatherMap API</p>
+                            <p>Deployed on AWS EC2</p>
+                        </footer>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>

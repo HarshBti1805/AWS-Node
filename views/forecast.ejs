@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast - <%= city %>
+    </title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .forecast-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .forecast-header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .forecast-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .forecast-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .forecast-date {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .forecast-icon {
+            margin: 15px 0;
+        }
+
+        .forecast-icon img {
+            width: 60px;
+            height: 60px;
+        }
+
+        .forecast-temp {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .forecast-description {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            text-transform: capitalize;
+        }
+
+        .forecast-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .forecast-detail {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #34495e;
+        }
+
+        .forecast-detail i {
+            color: #667eea;
+            width: 16px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="forecast-container">
+        <header class="forecast-header">
+            <h1><i class="fas fa-calendar-alt"></i> 5-Day Weather Forecast</h1>
+            <p>Detailed weather predictions for <%= city %>
+            </p>
+        </header>
+
+        <div class="navigation">
+            <a href="/" class="nav-btn"><i class="fas fa-home"></i> Current Weather</a>
+            <a href="/forecast" class="nav-btn active"><i class="fas fa-calendar-alt"></i> Forecast</a>
+            <a href="/compare" class="nav-btn"><i class="fas fa-balance-scale"></i> Compare Cities</a>
+            <a href="/air-quality" class="nav-btn"><i class="fas fa-wind"></i> Air Quality</a>
+        </div>
+
+        <div class="search-section">
+            <form class="search-form" method="GET" action="/forecast">
+                <div class="search-input-group">
+                    <input type="text" name="city" placeholder="Enter city name for forecast..." value="<%= city %>"
+                        class="search-input" required>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <% if (error) { %>
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <%= error %>
+            </div>
+            <% } %>
+
+                <% if (forecast && forecast.list) { %>
+                    <div class="forecast-grid">
+                        <% forecast.list.forEach((day, index)=> { %>
+                            <div class="forecast-card">
+                                <div class="forecast-date">
+                                    <% const date=new Date(day.dt * 1000); const options={ weekday: 'long' ,
+                                        month: 'short' , day: 'numeric' }; const
+                                        formattedDate=date.toLocaleDateString('en-US', options); %>
+                                        <%= formattedDate %>
+                                </div>
+
+                                <div class="forecast-icon">
+                                    <img src="https://openweathermap.org/img/wn/<%= day.weather[0].icon %>@2x.png"
+                                        alt="<%= day.weather[0].description %>">
+                                </div>
+
+                                <div class="forecast-temp">
+                                    <%= Math.round(day.main.temp) %>°C
+                                </div>
+
+                                <div class="forecast-description">
+                                    <%= day.weather[0].description %>
+                                </div>
+
+                                <div class="forecast-details">
+                                    <div class="forecast-detail">
+                                        <i class="fas fa-tint"></i>
+                                        <span>
+                                            <%= day.main.humidity %>%
+                                        </span>
+                                    </div>
+                                    <div class="forecast-detail">
+                                        <i class="fas fa-thermometer-half"></i>
+                                        <span>Feels like <%= Math.round(day.main.feels_like || day.main.temp) %>
+                                                °C</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }); %>
+                    </div>
+                    <% } %>
+
+                        <footer class="footer">
+                            <p>Powered by OpenWeatherMap API</p>
+                            <p>Deployed on AWS EC2</p>
+                        </footer>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>
