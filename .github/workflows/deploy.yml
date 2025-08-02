@@ -52,7 +52,7 @@ jobs:
             echo "🚀 Starting deployment..."
 
             # Navigate to project directory
-            cd home/ec2-user/AWS-Node
+            cd /home/ec2-user/AWS-Node
 
             # Backup current version
             echo "📦 Creating backup..."
