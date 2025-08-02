@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-cloud-sun"></i> Weather Dashboard</h1>
+            <p>Get real-time weather information for any city</p>
+        </header>
+
+        <div class="search-section">
+            <form class="search-form" method="GET" action="/">
+                <div class="search-input-group">
+                    <input type="text" name="city" placeholder="Enter city name..." value="<%= city %>"
+                        class="search-input" required>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <% if (error) { %>
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <%= error %>
+            </div>
+            <% } %>
+
+                <% if (weather) { %>
+                    <div class="weather-card">
+                        <div class="weather-header">
+                            <div class="location">
+                                <h2>
+                                    <%= weather.name %>
+                                </h2>
+                                <p class="country">
+                                    <%= weather.sys.country %>
+                                </p>
+                            </div>
+                            <div class="weather-icon">
+                                <img src="https://openweathermap.org/img/wn/<%= weather.weather[0].icon %>@2x.png"
+                                    alt="<%= weather.weather[0].description %>">
+                            </div>
+                        </div>
+
+                        <div class="weather-main">
+                            <div class="temperature">
+                                <span class="temp-value">
+                                    <%= Math.round(weather.main.temp) %>
+                                </span>
+                                <span class="temp-unit">°C</span>
+                            </div>
+                            <div class="weather-description">
+                                <%= weather.weather[0].description.charAt(0).toUpperCase() +
+                                    weather.weather[0].description.slice(1) %>
+                            </div>
+                        </div>
+
+                        <div class="weather-details">
+                            <div class="detail-item">
+                                <i class="fas fa-thermometer-half"></i>
+                                <div class="detail-content">
+                                    <span class="detail-label">Feels like</span>
+                                    <span class="detail-value">
+                                        <%= Math.round(weather.main.feels_like) %>°C
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <i class="fas fa-tint"></i>
+                                <div class="detail-content">
+                                    <span class="detail-label">Humidity</span>
+                                    <span class="detail-value">
+                                        <%= weather.main.humidity %>%
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <i class="fas fa-wind"></i>
+                                <div class="detail-content">
+                                    <span class="detail-label">Wind Speed</span>
+                                    <span class="detail-value">
+                                        <%= weather.wind.speed %> m/s
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="detail-item">
+                                <i class="fas fa-compress-alt"></i>
+                                <div class="detail-content">
+                                    <span class="detail-label">Pressure</span>
+                                    <span class="detail-value">
+                                        <%= weather.main.pressure %> hPa
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% } %>
+
+                        <% if (!hasApiKey) { %>
+                            <div class="demo-notice">
+                                <i class="fas fa-info-circle"></i>
+                                <p>This is demo data. To get real weather data, please set up your OpenWeatherMap API
+                                    key in the .env file.</p>
+                                <a href="https://openweathermap.org/api" target="_blank" class="api-link">
+                                    Get Free API Key <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <% } %>
+
+                                <footer class="footer">
+                                    <p>Powered by OpenWeatherMap API</p>
+                                    <p>Deployed on AWS EC2</p>
+                                </footer>
+    </div>
+
+    <script src="/js/script.js"></script>
+</body>
+
+</html>
