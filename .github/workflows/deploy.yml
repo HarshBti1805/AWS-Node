@@ -52,7 +52,19 @@ jobs:
             echo "🚀 Starting deployment..."
 
             # Navigate to project directory
-            cd /home/ec2-user/AWS-Node
+            cd /home/ec2-user
+            echo "📍 Current directory: $(pwd)"
+
+            # Check if AWS-Node directory exists
+            if [ ! -d "AWS-Node" ]; then
+              echo "❌ AWS-Node directory not found. Creating it..."
+              mkdir -p AWS-Node
+              cd AWS-Node
+              git init
+              git remote add origin https://github.com/${{ github.repository }}.git
+            else
+              cd AWS-Node
+            fi
 
             # Backup current version
             echo "📦 Creating backup..."
@@ -67,10 +79,32 @@ jobs:
 
             # Pull latest changes
             echo "⬇️ Pulling latest changes..."
-            git pull origin main
+            echo "📍 Current directory: $(pwd)"
+            echo "📁 Directory contents: $(ls -la)"
+
+            # Check if this is a git repository
+            if [ ! -d ".git" ]; then
+              echo "❌ Not a git repository. Cloning fresh..."
+              cd ..
+              rm -rf AWS-Node
+              git clone https://github.com/${{ github.repository }}.git AWS-Node
+              cd AWS-Node
+            else
+              git pull origin main
+            fi
 
             # Install dependencies
             echo "📦 Installing dependencies..."
+            echo "📍 Current directory: $(pwd)"
+            echo "📁 Directory contents: $(ls -la)"
+
+            # Check if package.json exists
+            if [ ! -f "package.json" ]; then
+              echo "❌ package.json not found. Current directory: $(pwd)"
+              echo "📁 Available files: $(ls -la)"
+              exit 1
+            fi
+
             npm install
 
             # Create logs directory with proper permissions
@@ -79,18 +113,29 @@ jobs:
 
             # Test the application locally
             echo "🧪 Testing application..."
+            echo "📍 Current directory: $(pwd)"
+            echo "📁 Checking for app.js: $(ls -la app.js 2>/dev/null || echo 'app.js not found')"
             node -e "console.log('✅ Local test passed')"
 
             # Restart with PM2
             echo "🔄 Restarting application..."
+            echo "📍 Current directory: $(pwd)"
+            echo "📁 Available files: $(ls -la *.js 2>/dev/null || echo 'No JS files found')"
+
             if pm2 list | grep -q "Weather-App"; then
               pm2 restart Weather-App
             else
               echo "🚀 Starting new PM2 process..."
               if [ -f "ecosystem.config.js" ]; then
+                echo "📁 Using ecosystem.config.js"
                 pm2 start ecosystem.config.js --env production
-              else
+              elif [ -f "app.js" ]; then
+                echo "📁 Using app.js directly"
                 pm2 start app.js --name "Weather-App"
+              else
+                echo "❌ No app.js or ecosystem.config.js found!"
+                echo "📁 Available files: $(ls -la)"
+                exit 1
               fi
             fi
 
