@@ -57,7 +57,12 @@ jobs:
             # Backup current version
             echo "📦 Creating backup..."
             cd ..
-            cp -r AWS-Node AWS-Node-backup-$(date +%Y%m%d-%H%M%S)
+            if [ -d "AWS-Node" ]; then
+              cp -r AWS-Node AWS-Node-backup-$(date +%Y%m%d-%H%M%S)
+              echo "✅ Backup created successfully"
+            else
+              echo "⚠️ No existing AWS-Node directory to backup"
+            fi
             cd AWS-Node
 
             # Pull latest changes
@@ -68,8 +73,9 @@ jobs:
             echo "📦 Installing dependencies..."
             npm install
 
-            # Create logs directory
-            mkdir -p logs
+            # Create logs directory with proper permissions
+            mkdir -p logs || sudo mkdir -p logs
+            chmod 755 logs || sudo chmod 755 logs
 
             # Test the application locally
             echo "🧪 Testing application..."
@@ -81,7 +87,11 @@ jobs:
               pm2 restart Weather-App
             else
               echo "🚀 Starting new PM2 process..."
-              pm2 start ecosystem.config.js --env production
+              if [ -f "ecosystem.config.js" ]; then
+                pm2 start ecosystem.config.js --env production
+              else
+                pm2 start app.js --name "Weather-App"
+              fi
             fi
 
             # Wait a moment for the app to start
@@ -89,19 +99,40 @@ jobs:
 
             # Check if deployment was successful
             echo "🔍 Verifying deployment..."
-            if curl -f http://localhost:3000/health; then
-              echo "✅ Deployment successful!"
-              echo "🌐 Application is running at: http://${{ secrets.EC2_HOST }}"
-            else
+            # Wait a bit more for the app to fully start
+            sleep 10
+
+            # Try multiple health check attempts
+            for i in {1..3}; do
+              echo "🔍 Health check attempt $i/3..."
+              if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+                echo "✅ Deployment successful!"
+                echo "🌐 Application is running at: http://${{ secrets.EC2_HOST }}"
+                break
+              else
+                echo "⚠️ Health check attempt $i failed, waiting..."
+                sleep 5
+              fi
+            done
+
+            if ! curl -f http://localhost:3000/health > /dev/null 2>&1; then
               echo "❌ Deployment failed, rolling back..."
               cd ..
-              rm -rf AWS-Node
-              mv AWS-Node-backup-* AWS-Node
-              cd AWS-Node
-              if pm2 list | grep -q "Weather-App"; then
-                pm2 restart Weather-App
+              if [ -d "AWS-Node-backup-*" ]; then
+                rm -rf AWS-Node
+                mv AWS-Node-backup-* AWS-Node
+                cd AWS-Node
+                if pm2 list | grep -q "Weather-App"; then
+                  pm2 restart Weather-App
+                else
+                  if [ -f "ecosystem.config.js" ]; then
+                    pm2 start ecosystem.config.js --env production
+                  else
+                    pm2 start app.js --name "Weather-App"
+                  fi
+                fi
               else
-                pm2 start ecosystem.config.js --env production
+                echo "⚠️ No backup found, cannot rollback"
               fi
               echo "🔄 Rollback completed"
               exit 1
@@ -114,6 +145,11 @@ jobs:
             # Show recent logs
             echo "📋 Recent logs:"
             pm2 logs Weather-App --lines 10
+
+            # Show process info
+            echo "🔍 Process information:"
+            ps aux | grep node
+            netstat -tlnp | grep :3000 || echo "No process listening on port 3000"
 
             # Save PM2 configuration for startup
             pm2 save
