@@ -68,13 +68,21 @@ jobs:
             echo "📦 Installing dependencies..."
             npm install
 
+            # Create logs directory
+            mkdir -p logs
+
             # Test the application locally
             echo "🧪 Testing application..."
             node -e "console.log('✅ Local test passed')"
 
             # Restart with PM2
             echo "🔄 Restarting application..."
-            pm2 restart Weather-App
+            if pm2 list | grep -q "Weather-App"; then
+              pm2 restart Weather-App
+            else
+              echo "🚀 Starting new PM2 process..."
+              pm2 start ecosystem.config.js --env production
+            fi
 
             # Wait a moment for the app to start
             sleep 5
@@ -90,7 +98,11 @@ jobs:
               rm -rf AWS-Node
               mv AWS-Node-backup-* AWS-Node
               cd AWS-Node
-              pm2 restart Weather-App
+              if pm2 list | grep -q "Weather-App"; then
+                pm2 restart Weather-App
+              else
+                pm2 start ecosystem.config.js --env production
+              fi
               echo "🔄 Rollback completed"
               exit 1
             fi
@@ -102,5 +114,9 @@ jobs:
             # Show recent logs
             echo "📋 Recent logs:"
             pm2 logs Weather-App --lines 10
+
+            # Save PM2 configuration for startup
+            pm2 save
+            pm2 startup
 
             echo "🎉 Deployment completed successfully!"
