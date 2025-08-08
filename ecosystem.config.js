@@ -9,11 +9,13 @@ module.exports = {
       max_memory_restart: "1G",
       env: {
         NODE_ENV: "production",
-        PORT: 3000,
+        PORT: 80,
+        OPENWEATHER_API_KEY: "your_actual_api_key_here",
       },
       env_production: {
         NODE_ENV: "production",
-        PORT: 3000,
+        PORT: 80,
+        OPENWEATHER_API_KEY: "your_actual_api_key_here",
       },
       error_file: "./logs/err.log",
       out_file: "./logs/out.log",

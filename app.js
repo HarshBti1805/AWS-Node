@@ -46,6 +46,54 @@ async function getForecastData(city, apiKey) {
   }
 }
 
+// New: Helper function to get UV index data
+async function getUVIndexData(lat, lon, apiKey) {
+  if (apiKey === "demo") {
+    return getDemoUVIndexData();
+  }
+
+  try {
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/uvi?lat=${lat}&lon=${lon}&appid=${apiKey}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// New: Helper function to get weather alerts
+async function getWeatherAlerts(city, apiKey) {
+  if (apiKey === "demo") {
+    return getDemoWeatherAlerts(city);
+  }
+
+  try {
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/onecall?q=${city}&appid=${apiKey}&units=metric&exclude=current,minutely,hourly,daily`
+    );
+    return response.data.alerts || [];
+  } catch (error) {
+    return [];
+  }
+}
+
+// New: Helper function to get air quality data
+async function getAirQualityData(lat, lon, apiKey) {
+  if (apiKey === "demo") {
+    return getDemoAirQualityData();
+  }
+
+  try {
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 // Demo weather data with more variety
 function getDemoWeatherData(city) {
   const demoData = {
@@ -59,6 +107,8 @@ function getDemoWeatherData(city) {
       country: "US",
       wind: 4.2,
       visibility: 10000,
+      lat: 40.7128,
+      lon: -74.006,
     },
     London: {
       temp: 15,
@@ -70,6 +120,8 @@ function getDemoWeatherData(city) {
       country: "GB",
       wind: 6.1,
       visibility: 8000,
+      lat: 51.5074,
+      lon: -0.1278,
     },
     Tokyo: {
       temp: 25,
@@ -81,6 +133,8 @@ function getDemoWeatherData(city) {
       country: "JP",
       wind: 2.8,
       visibility: 10000,
+      lat: 35.6762,
+      lon: 139.6503,
     },
     Sydney: {
       temp: 22,
@@ -92,6 +146,8 @@ function getDemoWeatherData(city) {
       country: "AU",
       wind: 5.5,
       visibility: 10000,
+      lat: -33.8688,
+      lon: 151.2093,
     },
     Paris: {
       temp: 20,
@@ -103,6 +159,8 @@ function getDemoWeatherData(city) {
       country: "FR",
       wind: 3.7,
       visibility: 9000,
+      lat: 48.8566,
+      lon: 2.3522,
     },
     Mumbai: {
       temp: 30,
@@ -114,6 +172,8 @@ function getDemoWeatherData(city) {
       country: "IN",
       wind: 2.1,
       visibility: 7000,
+      lat: 19.076,
+      lon: 72.8777,
     },
     Dubai: {
       temp: 35,
@@ -125,6 +185,8 @@ function getDemoWeatherData(city) {
       country: "AE",
       wind: 8.3,
       visibility: 10000,
+      lat: 25.2048,
+      lon: 55.2708,
     },
     Singapore: {
       temp: 28,
@@ -136,6 +198,8 @@ function getDemoWeatherData(city) {
       country: "SG",
       wind: 4.8,
       visibility: 6000,
+      lat: 1.3521,
+      lon: 103.8198,
     },
   };
 
@@ -161,6 +225,12 @@ function getDemoWeatherData(city) {
     },
     sys: {
       country: cityData.country,
+      sunrise: Math.floor(Date.now() / 1000) - 21600, // 6 hours ago
+      sunset: Math.floor(Date.now() / 1000) + 21600, // 6 hours from now
+    },
+    coord: {
+      lat: cityData.lat,
+      lon: cityData.lon,
     },
     visibility: cityData.visibility,
     dt: Math.floor(Date.now() / 1000),
@@ -195,6 +265,67 @@ function getDemoForecastData(city) {
   return {
     list: forecasts,
     city: { name: city },
+  };
+}
+
+// New: Demo UV index data
+function getDemoUVIndexData() {
+  return {
+    lat: 51.5074,
+    lon: -0.1278,
+    date_iso: new Date().toISOString(),
+    date: Math.floor(Date.now() / 1000),
+    value: Math.floor(Math.random() * 10) + 1,
+  };
+}
+
+// New: Demo weather alerts
+function getDemoWeatherAlerts(city) {
+  const alerts = [
+    {
+      sender_name: "Weather Service",
+      event: "Heavy Rain Warning",
+      start: Math.floor(Date.now() / 1000),
+      end: Math.floor(Date.now() / 1000) + 3600,
+      description: "Heavy rainfall expected in the next hour",
+      tags: ["rain", "warning"],
+    },
+    {
+      sender_name: "Weather Service",
+      event: "Wind Advisory",
+      start: Math.floor(Date.now() / 1000),
+      end: Math.floor(Date.now() / 1000) + 7200,
+      description: "Strong winds expected, secure loose objects",
+      tags: ["wind", "advisory"],
+    },
+  ];
+
+  return Math.random() > 0.5 ? alerts : [];
+}
+
+// New: Demo air quality data
+function getDemoAirQualityData() {
+  return {
+    coord: {
+      lat: 51.5074,
+      lon: -0.1278,
+    },
+    list: [
+      {
+        dt: Math.floor(Date.now() / 1000),
+        main: {
+          aqi: Math.floor(Math.random() * 5) + 1,
+        },
+        components: {
+          co: (Math.random() * 2000 + 500).toFixed(1),
+          no2: (Math.random() * 50 + 10).toFixed(1),
+          o3: (Math.random() * 100 + 20).toFixed(1),
+          so2: (Math.random() * 20 + 5).toFixed(1),
+          pm2_5: (Math.random() * 50 + 5).toFixed(1),
+          pm10: (Math.random() * 100 + 10).toFixed(1),
+        },
+      },
+    ],
   };
 }
 
@@ -350,6 +481,105 @@ app.get("/air-quality", async (req, res) => {
   }
 });
 
+// New: Weather alerts route
+app.get("/alerts", async (req, res) => {
+  try {
+    const city = req.query.city || "London";
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    let alerts = [];
+    let error = null;
+
+    if (apiKey && apiKey !== "demo") {
+      try {
+        alerts = await getWeatherAlerts(city, apiKey);
+      } catch (apiError) {
+        console.error("Alerts API Error:", apiError.message);
+      }
+    } else {
+      alerts = getDemoWeatherAlerts(city);
+    }
+
+    res.render("alerts", {
+      alerts: alerts,
+      city: city,
+      error: error,
+      hasApiKey: apiKey && apiKey !== "demo",
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+    res.render("alerts", {
+      alerts: [],
+      error: "An unexpected error occurred. Please try again.",
+      city: req.query.city || "London",
+      hasApiKey: false,
+    });
+  }
+});
+
+// New: UV Index route
+app.get("/uv-index", async (req, res) => {
+  try {
+    const city = req.query.city || "London";
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    let uvData = null;
+    let error = null;
+
+    if (apiKey && apiKey !== "demo") {
+      try {
+        const weatherData = await getWeatherData(city, apiKey);
+        uvData = await getUVIndexData(
+          weatherData.coord.lat,
+          weatherData.coord.lon,
+          apiKey
+        );
+      } catch (apiError) {
+        error = "Unable to fetch UV index data.";
+        console.error("UV Index API Error:", apiError.message);
+      }
+    } else {
+      uvData = getDemoUVIndexData();
+    }
+
+    res.render("uv-index", {
+      uvData: uvData,
+      city: city,
+      error: error,
+      hasApiKey: apiKey && apiKey !== "demo",
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+    res.render("uv-index", {
+      uvData: null,
+      error: "An unexpected error occurred. Please try again.",
+      city: req.query.city || "London",
+      hasApiKey: false,
+    });
+  }
+});
+
+// New: Weather maps route
+app.get("/maps", async (req, res) => {
+  try {
+    const city = req.query.city || "London";
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    res.render("maps", {
+      city: city,
+      apiKey: apiKey && apiKey !== "demo" ? apiKey : null,
+      hasApiKey: apiKey && apiKey !== "demo",
+    });
+  } catch (error) {
+    console.error("Server Error:", error);
+    res.render("maps", {
+      city: req.query.city || "London",
+      apiKey: null,
+      hasApiKey: false,
+    });
+  }
+});
+
 // API endpoints
 app.get("/api/weather/:city", async (req, res) => {
   try {
@@ -383,6 +613,79 @@ app.get("/api/forecast/:city", async (req, res) => {
   }
 });
 
+// New: Weather widget API endpoint
+app.get("/api/widget/:city", async (req, res) => {
+  try {
+    const city = req.params.city;
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    let weatherData = null;
+    if (apiKey && apiKey !== "demo") {
+      weatherData = await getWeatherData(city, apiKey);
+    } else {
+      weatherData = getDemoWeatherData(city);
+    }
+
+    // Return minimal data for widget
+    res.json({
+      city: weatherData.name,
+      country: weatherData.sys.country,
+      temp: Math.round(weatherData.main.temp),
+      weather: weatherData.weather[0].main,
+      icon: weatherData.weather[0].icon,
+      humidity: weatherData.main.humidity,
+      wind: weatherData.wind.speed,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch widget data" });
+  }
+});
+
+// New: UV Index API endpoint
+app.get("/api/uv-index/:city", async (req, res) => {
+  try {
+    const city = req.params.city;
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    if (!apiKey || apiKey === "demo") {
+      return res.status(400).json({ error: "API key not configured" });
+    }
+
+    const weatherData = await getWeatherData(city, apiKey);
+    const uvData = await getUVIndexData(
+      weatherData.coord.lat,
+      weatherData.coord.lon,
+      apiKey
+    );
+    res.json(uvData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch UV index data" });
+  }
+});
+
+// New: Air Quality API endpoint
+app.get("/api/air-quality/:city", async (req, res) => {
+  try {
+    const city = req.params.city;
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    if (!apiKey || apiKey === "demo") {
+      return res.status(400).json({ error: "API key not configured" });
+    }
+
+    const weatherData = await getWeatherData(city, apiKey);
+    const airQualityData = await getAirQualityData(
+      weatherData.coord.lat,
+      weatherData.coord.lon,
+      apiKey
+    );
+    res.json(airQualityData);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch air quality data" });
+  }
+});
+
 // Health check endpoint for AWS
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -390,8 +693,13 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     memory: process.memoryUsage(),
-    version: "2.0.0",
+    version: "3.0.0",
   });
+});
+
+// ALB health check endpoint
+app.get("/alb-health", (req, res) => {
+  res.status(200).send("OK");
 });
 
 // Stats endpoint
@@ -404,12 +712,16 @@ app.get("/stats", (req, res) => {
       platform: process.platform,
     },
     app: {
-      version: "2.0.0",
+      version: "3.0.0",
       features: [
         "Current Weather",
         "5-Day Forecast",
         "City Comparison",
         "Air Quality",
+        "Weather Alerts",
+        "UV Index",
+        "Weather Maps",
+        "Weather Widget",
         "API Endpoints",
       ],
       endpoints: [
@@ -417,8 +729,14 @@ app.get("/stats", (req, res) => {
         "/forecast",
         "/compare",
         "/air-quality",
+        "/alerts",
+        "/uv-index",
+        "/maps",
         "/api/weather/:city",
         "/api/forecast/:city",
+        "/api/widget/:city",
+        "/api/uv-index/:city",
+        "/api/air-quality/:city",
       ],
     },
   });
@@ -427,5 +745,7 @@ app.get("/stats", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   console.log(`Health check available at http://localhost:${PORT}/health`);
-  console.log(`New features: Forecast, Compare, Air Quality, API endpoints`);
+  console.log(
+    `New features: Weather Alerts, UV Index, Maps, Widget API, Enhanced API endpoints`
+  );
 });

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Alerts - Weather Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .search-form input[type="text"] {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            min-width: 250px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .search-form button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .search-form button:hover {
+            transform: translateY(-2px);
+        }
+
+        .alerts-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .alert-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #ff6b6b;
+            transition: transform 0.3s ease;
+        }
+
+        .alert-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .alert-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .alert-sender {
+            background: #3498db;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .alert-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .alert-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .alert-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .alert-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .alert-tag {
+            background: #e74c3c;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .no-alerts {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            color: #666;
+        }
+
+        .no-alerts h3 {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-form input[type="text"] {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌩️ Weather Alerts</h1>
+            <p>Stay informed about severe weather conditions in <%= city %>
+            </p>
+        </div>
+
+        <div class="navigation">
+            <a href="/" class="nav-link">🏠 Home</a>
+            <a href="/forecast" class="nav-link">📅 Forecast</a>
+            <a href="/compare" class="nav-link">🌍 Compare</a>
+            <a href="/air-quality" class="nav-link">🌬️ Air Quality</a>
+            <a href="/uv-index" class="nav-link">☀️ UV Index</a>
+            <a href="/maps" class="nav-link">🗺️ Maps</a>
+        </div>
+
+        <form class="search-form" method="GET">
+            <input type="text" name="city" placeholder="Enter city name..." value="<%= city %>" required>
+            <button type="submit">🔍 Search Alerts</button>
+        </form>
+
+        <% if (error) { %>
+            <div class="error-message">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <div class="alerts-container">
+                    <% if (alerts && alerts.length> 0) { %>
+                        <% alerts.forEach(function(alert) { %>
+                            <div class="alert-card">
+                                <div class="alert-header">
+                                    <div class="alert-title">⚠️ <%= alert.event %>
+                                    </div>
+                                    <div class="alert-sender">
+                                        <%= alert.sender_name %>
+                                    </div>
+                                </div>
+
+                                <div class="alert-description">
+                                    <%= alert.description %>
+                                </div>
+
+                                <div class="alert-meta">
+                                    <div class="alert-time">
+                                        🕐 Start: <%= new Date(alert.start * 1000).toLocaleString() %>
+                                    </div>
+                                    <div class="alert-time">
+                                        🕐 End: <%= new Date(alert.end * 1000).toLocaleString() %>
+                                    </div>
+                                </div>
+
+                                <% if (alert.tags && alert.tags.length> 0) { %>
+                                    <div class="alert-tags">
+                                        <% alert.tags.forEach(function(tag) { %>
+                                            <span class="alert-tag">
+                                                <%= tag %>
+                                            </span>
+                                            <% }); %>
+                                    </div>
+                                    <% } %>
+                            </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <div class="no-alerts">
+                                        <h3>✅ No Active Alerts</h3>
+                                        <p>There are currently no weather alerts for <%= city %>. The weather conditions
+                                                are normal.</p>
+                                    </div>
+                                    <% } %>
+                </div>
+    </div>
+</body>
+
+</html>

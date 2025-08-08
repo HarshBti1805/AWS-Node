@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Maps - Weather Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .search-form input[type="text"] {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            min-width: 250px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .search-form button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        .search-form button:hover {
+            transform: translateY(-2px);
+        }
+
+        .map-controls {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .map-type-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: #3498db;
+            color: white;
+        }
+
+        .map-type-btn.active {
+            background: #e74c3c;
+            transform: scale(1.05);
+        }
+
+        .map-type-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .map-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-frame {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .map-info {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .map-info h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .map-info p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .demo-notice {
+            background: #f39c12;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-form input[type="text"] {
+                min-width: auto;
+                width: 100%;
+            }
+
+            .map-frame {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🗺️ Weather Maps</h1>
+            <p>Interactive weather maps for <%= city %>
+            </p>
+        </div>
+
+        <div class="navigation">
+            <a href="/" class="nav-link">🏠 Home</a>
+            <a href="/forecast" class="nav-link">📅 Forecast</a>
+            <a href="/compare" class="nav-link">🌍 Compare</a>
+            <a href="/air-quality" class="nav-link">🌬️ Air Quality</a>
+            <a href="/alerts" class="nav-link">🌩️ Alerts</a>
+            <a href="/uv-index" class="nav-link">☀️ UV Index</a>
+        </div>
+
+        <form class="search-form" method="GET">
+            <input type="text" name="city" placeholder="Enter city name..." value="<%= city %>" required>
+            <button type="submit">🔍 View Maps</button>
+        </form>
+
+        <% if (!hasApiKey) { %>
+            <div class="demo-notice">
+                <strong>Demo Mode:</strong> This is a demonstration of the weather maps feature. With a real API key,
+                you would see interactive OpenWeather maps.
+            </div>
+            <% } %>
+
+                <div class="map-controls">
+                    <button class="map-type-btn active" onclick="showMap('temperature')">🌡️ Temperature</button>
+                    <button class="map-type-btn" onclick="showMap('precipitation')">🌧️ Precipitation</button>
+                    <button class="map-type-btn" onclick="showMap('wind')">💨 Wind</button>
+                    <button class="map-type-btn" onclick="showMap('clouds')">☁️ Clouds</button>
+                    <button class="map-type-btn" onclick="showMap('pressure')">📊 Pressure</button>
+                </div>
+
+                <div class="map-container">
+                    <iframe id="weather-map" class="map-frame"
+                        src="https://openweathermap.org/weathermap?basemap=map&cities=true&layer=temperature&lat=51.5074&lon=-0.1278&zoom=10"
+                        allowfullscreen>
+                    </iframe>
+
+                    <div class="map-info">
+                        <h3>🗺️ Interactive Weather Maps</h3>
+                        <p>
+                            Explore different weather conditions with our interactive maps. You can view temperature,
+                            precipitation, wind patterns, cloud coverage, and atmospheric pressure.
+                            The maps are powered by OpenWeatherMap and provide real-time weather data visualization.
+                        </p>
+                        <p>
+                            <strong>Current Location:</strong>
+                            <%= city %><br>
+                                <strong>Map Type:</strong> <span id="current-map-type">Temperature</span>
+                        </p>
+                    </div>
+                </div>
+    </div>
+
+    <script>
+        function showMap(type) {
+            const mapFrame = document.getElementById('weather-map');
+            const currentType = document.getElementById('current-map-type');
+
+            // Update active button
+            document.querySelectorAll('.map-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update map type display
+            currentType.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+
+            // Map type configurations
+            const mapConfigs = {
+                temperature: {
+                    layer: 'temperature',
+                    icon: '🌡️'
+                },
+                precipitation: {
+                    layer: 'precipitation_new',
+                    icon: '🌧️'
+                },
+                wind: {
+                    layer: 'wind_new',
+                    icon: '💨'
+                },
+                clouds: {
+                    layer: 'clouds_new',
+                    icon: '☁️'
+                },
+                pressure: {
+                    layer: 'pressure_new',
+                    icon: '📊'
+                }
+            };
+
+            const config = mapConfigs[type];
+            if (config) {
+                // For demo purposes, we'll show a static map
+                // In production with API key, you would use the OpenWeatherMap API
+                mapFrame.src = `https://openweathermap.org/weathermap?basemap=map&cities=true&layer=${config.layer}&lat=51.5074&lon=-0.1278&zoom=10`;
+            }
+        }
+
+        // Initialize with temperature map
+        document.addEventListener('DOMContentLoaded', function () {
+            showMap('temperature');
+        });
+    </script>
+</body>
+
+</html>
