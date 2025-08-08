@@ -202,14 +202,12 @@ function getDemoForecastData(city) {
 app.get("/", async (req, res) => {
   try {
     const city = req.query.city || "London";
-    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+    const apiKey = process.env.OPENWEATHER_API_KEY;
 
     let weatherData = null;
     let error = null;
 
-    const useDemoMode = apiKey === "demo";
-
-    if (apiKey !== "demo" && !useDemoMode) {
+    if (apiKey && apiKey !== "demo") {
       try {
         weatherData = await getWeatherData(city, apiKey);
       } catch (apiError) {
@@ -225,7 +223,7 @@ app.get("/", async (req, res) => {
       weather: weatherData,
       error: error,
       city: city,
-      hasApiKey: apiKey !== "demo",
+      hasApiKey: apiKey && apiKey !== "demo",
     });
   } catch (error) {
     console.error("Server Error:", error);
@@ -242,14 +240,12 @@ app.get("/", async (req, res) => {
 app.get("/forecast", async (req, res) => {
   try {
     const city = req.query.city || "London";
-    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+    const apiKey = process.env.OPENWEATHER_API_KEY;
 
     let forecastData = null;
     let error = null;
 
-    const useDemoMode = apiKey === "demo";
-
-    if (apiKey !== "demo" && !useDemoMode) {
+    if (apiKey && apiKey !== "demo") {
       try {
         forecastData = await getForecastData(city, apiKey);
       } catch (apiError) {
@@ -265,7 +261,7 @@ app.get("/forecast", async (req, res) => {
       forecast: forecastData,
       error: error,
       city: city,
-      hasApiKey: apiKey !== "demo",
+      hasApiKey: apiKey && apiKey !== "demo",
     });
   } catch (error) {
     console.error("Server Error:", error);
@@ -284,16 +280,14 @@ app.get("/compare", async (req, res) => {
     const cities = req.query.cities
       ? req.query.cities.split(",")
       : ["London", "New York", "Tokyo"];
-    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+    const apiKey = process.env.OPENWEATHER_API_KEY;
 
     let citiesData = [];
     let error = null;
 
-    const useDemoMode = apiKey === "demo";
-
     for (const city of cities) {
       try {
-        if (apiKey !== "demo" && !useDemoMode) {
+        if (apiKey && apiKey !== "demo") {
           const data = await getWeatherData(city, apiKey);
           citiesData.push(data);
         } else {
@@ -309,7 +303,7 @@ app.get("/compare", async (req, res) => {
       cities: citiesData,
       error: error,
       cityList: cities.join(","),
-      hasApiKey: apiKey !== "demo",
+      hasApiKey: apiKey && apiKey !== "demo",
     });
   } catch (error) {
     console.error("Server Error:", error);
@@ -360,7 +354,11 @@ app.get("/air-quality", async (req, res) => {
 app.get("/api/weather/:city", async (req, res) => {
   try {
     const city = req.params.city;
-    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    if (!apiKey || apiKey === "demo") {
+      return res.status(400).json({ error: "API key not configured" });
+    }
 
     const weatherData = await getWeatherData(city, apiKey);
     res.json(weatherData);
@@ -372,7 +370,11 @@ app.get("/api/weather/:city", async (req, res) => {
 app.get("/api/forecast/:city", async (req, res) => {
   try {
     const city = req.params.city;
-    const apiKey = process.env.OPENWEATHER_API_KEY || "demo";
+    const apiKey = process.env.OPENWEATHER_API_KEY;
+
+    if (!apiKey || apiKey === "demo") {
+      return res.status(400).json({ error: "API key not configured" });
+    }
 
     const forecastData = await getForecastData(city, apiKey);
     res.json(forecastData);
